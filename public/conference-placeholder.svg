@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="640" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#123F38"/><stop offset="1" stop-color="#278B76"/>
+    </linearGradient>
+    <linearGradient id="orb" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#B8E2CF" stop-opacity=".9"/><stop offset="1" stop-color="#68BDA0" stop-opacity=".2"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" rx="18" fill="url(#bg)"/>
+  <circle cx="520" cy="145" r="155" fill="url(#orb)" fill-opacity=".28"/>
+  <circle cx="520" cy="145" r="112" stroke="#D9F1E5" stroke-opacity=".3"/>
+  <circle cx="520" cy="145" r="76" stroke="#D9F1E5" stroke-opacity=".45"/>
+  <path d="M430 145h180M520 55v180" stroke="#D9F1E5" stroke-opacity=".22"/>
+  <path d="M520 105c-22-28-63-8-48 24 11 23 48 54 48 54s37-31 48-54c15-32-26-52-48-24Z" fill="#F1FAF5" fill-opacity=".88"/>
+  <path d="M507 137h26M520 124v26" stroke="#278B76" stroke-width="8" stroke-linecap="round"/>
+  <path d="M0 300c110-45 211-45 320 0s211 45 320 0v60H0v-60Z" fill="#0B302C" fill-opacity=".35"/>
+  <rect x="44" y="42" width="34" height="3" rx="1.5" fill="#D6B878"/>
+  <text x="44" y="77" fill="#D5E9DF" font-family="Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="3">MEDITALK  /  SCIENCE</text>
+  <text x="44" y="226" fill="#FFFFFF" font-family="Georgia, serif" font-size="32" font-weight="700">Medical conference</text>
+  <text x="44" y="254" fill="#D7EBE1" font-family="Arial, sans-serif" font-size="14" letter-spacing="1">KNOWLEDGE THAT MOVES MEDICINE FORWARD</text>
+</svg>
