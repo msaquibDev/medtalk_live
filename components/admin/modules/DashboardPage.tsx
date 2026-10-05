@@ -29,7 +29,6 @@ export function DashboardPage() {
       <PageHeading
         eyebrow={currentDate}
         title="Hello, Admin"
-        description="Here is what is happening across your Meditalk community."
         action={
           <button className="secondary" type="button">
             Refresh

@@ -20,6 +20,18 @@ export type Faculty = {
   speciality: string;
 };
 
+export type Speciality = { id: number; name: string };
+
+export const initialSpecialities: Speciality[] = [
+  { id: 1, name: "Uro-Oncology" },
+  { id: 2, name: "Endourology" },
+  { id: 3, name: "Andrology" },
+  { id: 4, name: "Pediatric Urology" },
+  { id: 5, name: "Reconstructive Urology" },
+  { id: 6, name: "General Urology" },
+  { id: 7, name: "Other" },
+];
+
 export const initialConferences: Conference[] = [
   { id: 1, name: "Advances in Uro-Oncology 2026", start: "Oct 18, 2026 | 09:00 AM", venue: "Taj Palace, New Delhi", banner: "/conference-placeholder.svg", amount: "INR 2,500", type: "Paid", status: "Upcoming", attendees: 248 },
   { id: 2, name: "Endourology Masterclass", start: "Oct 12, 2026 | 10:30 AM", venue: "Online | Meditalk Live", banner: "/conference-placeholder.svg", amount: "Free", type: "Free", status: "Live", attendees: 186 },

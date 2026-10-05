@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { FormEvent } from "react";
-import { Download, Plus, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Plus, X } from "lucide-react";
+import { Field } from "@/components/admin/PageHeading";
 import { SelectField } from "@/components/admin/SelectField";
+import { ExportButton, TableToolbar } from "@/components/admin/TableToolbar";
 
 export type Coupon = {
   id: number;
@@ -13,7 +14,6 @@ export type Coupon = {
   status: "Active" | "Redeemed" | "Expired";
   date?: string;
 };
-
 type CouponChanges = Pick<Coupon, "code" | "userName" | "status">;
 type CouponManagerProps = {
   coupons: Coupon[];
@@ -26,44 +26,258 @@ const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 function makeCode(prefix: string, existing: Set<string>) {
   let code = "";
   do {
-    const suffix = Array.from({ length: 6 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
+    const suffix = Array.from(
+      { length: 6 },
+      () => alphabet[Math.floor(Math.random() * alphabet.length)],
+    ).join("");
     code = `${prefix}${prefix ? "-" : ""}${suffix}`;
   } while (existing.has(code));
   existing.add(code);
   return code;
 }
 
-/** Parent owns coupon data; these callbacks can be replaced with API mutations. */
-export function CouponManager({ coupons, onCreate, onUpdate, onExport }: CouponManagerProps) {
-  const [showCreate, setShowCreate] = useState(false);
+export function CouponManager({
+  coupons,
+  onCreate,
+  onUpdate,
+  onExport,
+}: CouponManagerProps) {
+  const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState<Coupon | undefined>();
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("All statuses");
   const [quantity, setQuantity] = useState("5");
   const [prefix, setPrefix] = useState("");
-  const [editing, setEditing] = useState<number | null>(null);
-  const [draft, setDraft] = useState<CouponChanges>({ code: "", userName: "", status: "Active" });
-  const selectedCodes = new Set(coupons.map((coupon) => coupon.code.toUpperCase()));
-
-  function createCoupons(event: FormEvent<HTMLFormElement>) {
+  const rows = useMemo(
+    () =>
+      coupons.filter(
+        (coupon) =>
+          `${coupon.code} ${coupon.userName} ${coupon.status}`
+            .toLowerCase()
+            .includes(search.toLowerCase()) &&
+          (filter === "All statuses" || coupon.status === filter),
+      ),
+    [coupons, search, filter],
+  );
+  function openCreate() {
+    setEditing(undefined);
+    setQuantity("5");
+    setPrefix("");
+    setFormOpen(true);
+  }
+  function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const count = Math.max(1, Math.min(100, Number(quantity) || 1));
-    const batch = Array.from({ length: count }, (_, index): Coupon => ({
-      id: Date.now() + index,
-      code: makeCode(prefix.trim().toUpperCase().replace(/[^A-Z0-9]/g, ""), selectedCodes),
-      userName: "-",
-      status: "Active",
-    }));
-    onCreate(batch);
-    setShowCreate(false);
+    const data = new FormData(event.currentTarget);
+    if (editing) {
+      onUpdate(editing.id, {
+        code: String(data.get("code")).toUpperCase(),
+        userName: String(data.get("userName")),
+        status: String(data.get("status")) as Coupon["status"],
+      });
+    } else {
+      const existing = new Set(
+        coupons.map((coupon) => coupon.code.toUpperCase()),
+      );
+      const count = Math.max(
+        1,
+        Math.min(500, Number(data.get("quantity")) || 1),
+      );
+      const safePrefix = String(data.get("prefix") || "")
+        .trim()
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "");
+      onCreate(
+        Array.from(
+          { length: count },
+          (_, index): Coupon => ({
+            id: Date.now() + index,
+            code: makeCode(safePrefix, existing),
+            userName: "-",
+            status: "Active",
+          }),
+        ),
+      );
+    }
+    setFormOpen(false);
+    setEditing(undefined);
   }
-
-  function beginUpdate(coupon: Coupon) {
-    setEditing(coupon.id);
-    setDraft({ code: coupon.code, userName: coupon.userName, status: coupon.status });
-  }
-
-  return <div className="coupon-manager">
-    <div className="coupon-toolbar"><div className="coupon-summary"><strong>{coupons.length}</strong><span>coupons generated</span></div><div className="coupon-toolbar-actions"><Button type="button" variant="outline" className="secondary" onClick={onExport}><Download size={15}/> Download CSV</Button><Button type="button" className="primary" onClick={() => setShowCreate((open) => !open)}><Plus size={16}/> Add coupons</Button></div></div>
-    {showCreate && <form className="coupon-create-form" onSubmit={createCoupons}><div className="coupon-create-copy"><strong>Generate a coupon batch</strong><span>Every generated code will be unique.</span></div><label className="coupon-form-field"><span>Number of coupons</span><input type="number" min="1" max="100" value={quantity} onChange={(event) => setQuantity(event.target.value)} required/></label><label className="coupon-form-field"><span>Code prefix <small>optional</small></span><input value={prefix} onChange={(event) => setPrefix(event.target.value.toUpperCase())} maxLength={10} placeholder="Example: URO26"/></label><Button className="primary coupon-generate">Generate codes</Button></form>}
-    <div className="table-scroll"><table><thead><tr><th>COUPON CODE</th><th>ASSIGNED TO</th><th>STATUS</th><th>CREATED / REDEEMED</th><th>ACTION</th></tr></thead><tbody>{coupons.map((coupon) => editing === coupon.id ? <tr key={coupon.id} className="coupon-edit-row"><td><input aria-label="Coupon code" value={draft.code} onChange={(event) => setDraft({ ...draft, code: event.target.value.toUpperCase() })}/></td><td><input aria-label="Assigned user" value={draft.userName} onChange={(event) => setDraft({ ...draft, userName: event.target.value })}/></td><td><SelectField name="status" value={draft.status} onValueChange={(status) => setDraft({ ...draft, status: status as Coupon["status"] })} options={["Active", "Redeemed", "Expired"].map((value) => ({ label: value, value }))}/></td><td><span className="muted">{coupon.date || "-"}</span></td><td className="coupon-action-buttons"><button type="button" className="manage-button" onClick={() => { onUpdate(coupon.id, draft); setEditing(null); }}>Save update</button><button type="button" className="coupon-cancel" onClick={() => setEditing(null)} aria-label="Cancel update"><X size={15}/></button></td></tr> : <tr key={coupon.id}><td><code className="coupon-code">{coupon.code}</code></td><td>{coupon.userName}</td><td><span className={`status-pill ${coupon.status.toLowerCase()}-pill`}><i/>{coupon.status}</span></td><td><small className="muted">{coupon.date || "Oct 04, 2026"}</small></td><td><button type="button" className="manage-button" onClick={() => beginUpdate(coupon)}>Update</button></td></tr>)}</tbody></table>{coupons.length===0&&<div className="empty-state">No coupons yet. Use Add coupons to create a batch.</div>}</div>
-    <div className="coupon-note">Coupon codes are frontend demo data until the API is connected.</div>
-  </div>;
+  return (
+    <div className="coupon-manager">
+      <div className="coupon-toolbar">
+        <div className="coupon-summary">
+          <strong>{coupons.length}</strong>
+          <span>coupons generated</span>
+        </div>
+        <div className="coupon-toolbar-actions">
+          <ExportButton onClick={onExport} />
+          <button type="button" className="primary" onClick={openCreate}>
+            <Plus size={16} /> Add coupons
+          </button>
+        </div>
+      </div>
+      <TableToolbar
+        search={search}
+        onSearch={setSearch}
+        placeholder="Search coupons..."
+        filter={filter}
+        onFilter={setFilter}
+        filterOptions={["All statuses", "Active", "Redeemed", "Expired"].map(
+          (value) => ({ label: value, value }),
+        )}
+      />
+      <div className="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>COUPON CODE</th>
+              <th>ASSIGNED TO</th>
+              <th>STATUS</th>
+              <th>CREATED / REDEEMED</th>
+              <th>ACTION</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((coupon) => (
+              <tr key={coupon.id}>
+                <td>
+                  <code className="coupon-code">{coupon.code}</code>
+                </td>
+                <td>{coupon.userName}</td>
+                <td>
+                  <span
+                    className={`status-pill ${coupon.status.toLowerCase()}-pill`}
+                  >
+                    <i />
+                    {coupon.status}
+                  </span>
+                </td>
+                <td>
+                  <small className="muted">
+                    {coupon.date || "Oct 04, 2026"}
+                  </small>
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    className="manage-button"
+                    onClick={() => {
+                      setEditing(coupon);
+                      setFormOpen(true);
+                    }}
+                  >
+                    Edit
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {rows.length === 0 && (
+          <div className="empty-state">No coupons match your search.</div>
+        )}
+      </div>
+      <div className="coupon-note">
+        Coupon codes are frontend demo data until the API is connected.
+      </div>
+      {formOpen && (
+        <div
+          className="overlay"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setFormOpen(false);
+              setEditing(undefined);
+            }
+          }}
+        >
+          <form className="drawer" onSubmit={submit}>
+            <div className="drawer-head">
+              <div>
+                {/* <div className="eyebrow">COUPON MANAGEMENT</div> */}
+                <h2>{editing ? "Edit Coupon" : "Add Coupons"}</h2>
+                {/* <p>
+                  {editing
+                    ? "Update the coupon details and status."
+                    : "Generate a batch of unique coupon codes."}
+                </p> */}
+              </div>
+              <button
+                type="button"
+                className="close-button"
+                onClick={() => {
+                  setFormOpen(false);
+                  setEditing(undefined);
+                }}
+                aria-label="Close"
+              >
+                <X size={17} />
+              </button>
+            </div>
+            {editing ? (
+              <>
+                <Field label="Coupon code" required>
+                  <input name="code" defaultValue={editing.code} required />
+                </Field>
+                <Field label="Assigned to">
+                  <input name="userName" defaultValue={editing.userName} />
+                </Field>
+                <Field label="Status">
+                  <SelectField
+                    name="status"
+                    defaultValue={editing.status}
+                    options={["Active", "Redeemed", "Expired"].map((value) => ({
+                      label: value,
+                      value,
+                    }))}
+                  />
+                </Field>
+              </>
+            ) : (
+              <>
+                <Field label="Number of coupons" required>
+                  <input
+                    name="quantity"
+                    type="number"
+                    min="1"
+                    max="500"
+                    value={quantity}
+                    onChange={(event) => setQuantity(event.target.value)}
+                    required
+                  />
+                </Field>
+                <Field label="Code prefix">
+                  <input
+                    name="prefix"
+                    value={prefix}
+                    onChange={(event) =>
+                      setPrefix(event.target.value.toUpperCase())
+                    }
+                    maxLength={10}
+                    placeholder="Optional, e.g. URO26"
+                  />
+                </Field>
+                <small className="drawer-hint">
+                  You can generate up to 500 coupons per batch.
+                </small>
+              </>
+            )}
+            <div className="drawer-actions">
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => {
+                  setFormOpen(false);
+                  setEditing(undefined);
+                }}
+              >
+                Cancel
+              </button>
+              <button className="primary">
+                {editing ? "Save changes" : "Generate coupons"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+    </div>
+  );
 }

@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   LogOut,
   Stethoscope,
+  Tags,
   Users,
 } from "lucide-react";
 import { AdminDataProvider } from "@/components/admin/AdminDataProvider";
@@ -21,7 +22,8 @@ const navigation = [
   { label: "Users", href: "/users", icon: Users },
   { label: "Conferences", href: "/conferences", icon: CalendarDays },
   { label: "Faculty", href: "/faculty", icon: Stethoscope },
-  { label: "Courses", href: "/courses", icon: BookOpen },
+  { label: "Speciality", href: "/specialities", icon: Tags },
+  // { label: "Courses", href: "/courses", icon: BookOpen },
 ];
 
 export function AdminShell({ children }: { children: ReactNode }) {

@@ -11,10 +11,11 @@ type DatePickerFieldProps = {
   name: string;
   placeholder?: string;
   initialValue?: string;
+  compact?: boolean;
 };
 
 /** A reusable shadcn calendar field. A hidden input keeps native FormData/API wiring simple. */
-export function DatePickerField({ name, placeholder = "Choose a date", initialValue }: DatePickerFieldProps) {
+export function DatePickerField({ name, placeholder = "Choose a date", initialValue, compact = false }: DatePickerFieldProps) {
   const [date, setDate] = useState<Date | undefined>(() => initialValue ? new Date(`${initialValue}T00:00:00`) : undefined);
 
   return (
@@ -27,8 +28,8 @@ export function DatePickerField({ name, placeholder = "Choose a date", initialVa
             {date ? format(date, "EEE, MMM d, yyyy") : placeholder}
           </Button>
         </PopoverTrigger>
-        <PopoverContent align="start" className="w-auto p-0">
-          <Calendar mode="single" selected={date} onSelect={setDate} />
+        <PopoverContent align="start" className={`date-picker-popover w-auto p-0 ${compact ? "compact-calendar" : ""}`}>
+          <Calendar className="date-picker-calendar" mode="single" selected={date} onSelect={setDate} />
         </PopoverContent>
       </Popover>
     </>
