@@ -2286,7 +2286,9 @@ tbody td strong {
   font-size: 13px !important;
   font-weight: 400 !important;
   text-align: left;
-  transition: border-color 140ms ease, box-shadow 140ms ease;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease;
 }
 .form-select-trigger:hover {
   border-color: #9bbdaf !important;
@@ -3081,4 +3083,13 @@ tbody td strong {
     object-fit: contain;
     padding: 5px;
   }
+}
+.event-name strong {
+  font-weight: 700;
+  color: #1f2d27;
+}
+.event-name small {
+  font-weight: 400;
+  color: #141414;
+  font-size: 26px;
 }
