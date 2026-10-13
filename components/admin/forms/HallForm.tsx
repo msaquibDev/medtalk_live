@@ -9,7 +9,7 @@ export type Hall = {
   id: number;
   name: string;
   link: string;
-  status: "Live" | "Upcoming" | "Recorded";
+  status: "Active" | "Inactive";
 };
 
 export function HallForm({
@@ -73,8 +73,8 @@ export function HallForm({
         <Field label="Status">
           <SelectField
             name="status"
-            defaultValue={initial?.status || "Upcoming"}
-            options={["Upcoming", "Live", "Recorded"].map((value) => ({
+            defaultValue={initial?.status || "Active"}
+            options={["Active", "Inactive"].map((value) => ({
               label: value,
               value,
             }))}

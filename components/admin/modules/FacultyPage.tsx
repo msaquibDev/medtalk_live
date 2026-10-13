@@ -55,11 +55,11 @@ export function FacultyPage() {
           </button>
         }
       />
-      <div className="metric-strip">
+      <div className="metric-strip faculty-metric-strip">
         <strong>
           {faculty.length} <small>faculty members</small>
         </strong>
-        <span>Across {specialities.length} specialities</span>
+        <span>Across {specialities.length} Specialities</span>
         <SearchField
           value={search}
           onChange={setSearch}

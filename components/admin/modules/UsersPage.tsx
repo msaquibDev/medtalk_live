@@ -2,22 +2,38 @@
 
 import { useMemo, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { initialUsers } from "@/components/admin/model";
 import { PageHeading, SearchField } from "@/components/admin/PageHeading";
 import { ExportButton } from "@/components/admin/TableToolbar";
+import { TablePagination } from "@/components/admin/TablePagination";
 import { downloadCsv } from "@/lib/csv";
+import { useAdminData } from "@/components/admin/AdminDataProvider";
+import type { RegisteredUser } from "@/components/admin/model";
+import {
+  UserProfileForm,
+  type UserProfileFormValue,
+} from "@/components/admin/forms/UserProfileForm";
 
 export function UsersPage() {
+  const { users, setUsers, specialities } = useAdminData();
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<number[]>([]);
-  const rows = useMemo(
+  const [editing, setEditing] = useState<RegisteredUser | undefined>();
+  const filteredUsers = useMemo(
     () =>
-      initialUsers.filter((user) =>
-        `${user.name} ${user.email} ${user.mobile}`
+      users.filter((user) =>
+        `${user.name} ${user.email} ${user.phoneCode} ${user.mobile} ${user.hospital} ${user.speciality}`
           .toLowerCase()
           .includes(search.toLowerCase()),
       ),
-    [search],
+    [users, search],
+  );
+  const pageSize = 5;
+  const pageCount = Math.max(1, Math.ceil(filteredUsers.length / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const rows = filteredUsers.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
   );
   const allSelected =
     rows.length > 0 && rows.every((user) => selected.includes(user.id));
@@ -28,6 +44,15 @@ export function UsersPage() {
         : selected.filter((id) => !rows.some((row) => row.id === id)),
     );
   }
+  function saveProfile(value: UserProfileFormValue) {
+    if (!editing) return;
+    setUsers((current) =>
+      current.map((user) =>
+        user.id === editing.id ? { ...user, ...value } : user,
+      ),
+    );
+    setEditing(undefined);
+  }
   return (
     <>
       <PageHeading
@@ -36,11 +61,22 @@ export function UsersPage() {
           <ExportButton
             onClick={() =>
               downloadCsv("meditalk-registered-users.csv", [
-                ["Full name", "Email", "Mobile", "Registered at"],
-                ...rows.map((user) => [
+                [
+                  "Full name",
+                  "Email",
+                  "Phone code",
+                  "Mobile",
+                  "Hospital / Institute",
+                  "Speciality",
+                  "Registered at",
+                ],
+                ...filteredUsers.map((user) => [
                   user.name,
                   user.email,
+                  user.phoneCode,
                   user.mobile,
+                  user.hospital,
+                  user.speciality,
                   user.registeredAt,
                 ]),
               ])
@@ -53,12 +89,12 @@ export function UsersPage() {
         <strong>
           1,284 <small>total users</small>
         </strong>
-        <span>
-          +12.8% <small>compared to last month</small>
-        </span>
         <SearchField
           value={search}
-          onChange={setSearch}
+          onChange={(value) => {
+            setSearch(value);
+            setPage(1);
+          }}
           placeholder="Search users..."
         />
       </div>
@@ -79,6 +115,7 @@ export function UsersPage() {
                 <th>MOBILE</th>
                 <th>REGISTERED AT</th>
                 <th>STATUS</th>
+                <th>ACTION</th>
               </tr>
             </thead>
             <tbody>
@@ -111,13 +148,24 @@ export function UsersPage() {
                     </span>
                   </td>
                   <td>{user.email}</td>
-                  <td>{user.mobile}</td>
+                  <td>
+                    {user.phoneCode} {user.mobile}
+                  </td>
                   <td>{user.registeredAt}</td>
                   <td>
                     <span className="status-pill active-pill">
                       <i />
                       Active
                     </span>
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      className="secondary edit-profile-button"
+                      onClick={() => setEditing(user)}
+                    >
+                      Edit Profile
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -127,17 +175,22 @@ export function UsersPage() {
             <div className="empty-state">No users match your search.</div>
           )}
         </div>
-        <div className="table-footer">
-          Showing {rows.length} users{" "}
-          <div className="pagination">
-            <button type="button">Previous</button>
-            <button type="button" className="current">
-              1
-            </button>
-            <button type="button">Next</button>
-          </div>
-        </div>
+        <TablePagination
+          totalItems={filteredUsers.length}
+          page={currentPage}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          itemLabel="users"
+        />
       </section>
+      {editing && (
+        <UserProfileForm
+          user={editing}
+          specialities={specialities.map((item) => item.name)}
+          onSave={saveProfile}
+          onCancel={() => setEditing(undefined)}
+        />
+      )}
     </>
   );
 }

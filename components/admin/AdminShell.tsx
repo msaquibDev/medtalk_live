@@ -5,8 +5,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  Bell,
-  BookOpen,
   CalendarDays,
   LayoutDashboard,
   LogOut,
@@ -15,6 +13,7 @@ import {
   Users,
 } from "lucide-react";
 import { AdminDataProvider } from "@/components/admin/AdminDataProvider";
+import { AdminProfileContext, defaultAdminProfile, type AdminProfile } from "@/components/admin/AdminProfileContext";
 import type { ReactNode } from "react";
 
 const navigation = [
@@ -23,21 +22,39 @@ const navigation = [
   { label: "Conferences", href: "/conferences", icon: CalendarDays },
   { label: "Faculty", href: "/faculty", icon: Stethoscope },
   { label: "Speciality", href: "/specialities", icon: Tags },
-  // { label: "Courses", href: "/courses", icon: BookOpen },
 ];
 
 export function AdminShell({ children }: { children: ReactNode }) {
   const path = usePathname();
   const router = useRouter();
   const [ready, setReady] = useState(false);
+  const [profile, setProfile] = useState<AdminProfile>(defaultAdminProfile);
 
   useEffect(() => {
     if (sessionStorage.getItem("meditalk-admin") !== "signed-in") {
       router.replace("/");
       return;
     }
+    try {
+      const savedProfile = localStorage.getItem("meditalk-admin-profile");
+      if (savedProfile) setProfile({ ...defaultAdminProfile, ...JSON.parse(savedProfile) });
+    } catch {
+      localStorage.removeItem("meditalk-admin-profile");
+    }
     setReady(true);
   }, [router]);
+
+  function updateProfile(nextProfile: AdminProfile) {
+    setProfile(nextProfile);
+    localStorage.setItem("meditalk-admin-profile", JSON.stringify(nextProfile));
+  }
+
+  const initials = profile.name
+    .split(/\s+/)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   function logout() {
     sessionStorage.removeItem("meditalk-admin");
@@ -51,6 +68,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   return (
     <AdminDataProvider>
+      <AdminProfileContext.Provider value={{ profile, updateProfile }}>
       <div className="app-shell">
         <aside className="sidebar">
           <Link
@@ -89,14 +107,18 @@ export function AdminShell({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="sidebar-bottom">
-            <button type="button" className="profile" onClick={logout}>
-              <div className="avatar">AS</div>
+            <div className="sidebar-profile-row">
+            <Link href="/profile" className="profile" aria-label="Edit admin profile">
+              <div className="avatar">{initials}</div>
               <div>
-                <strong>Admin Sharma</strong>
+                <strong>{profile.name}</strong>
                 <small>Administrator</small>
               </div>
+            </Link>
+            <button type="button" className="profile-logout" onClick={logout} aria-label="Log out">
               <LogOut className="logout-icon" size={16} />
             </button>
+            </div>
           </div>
         </aside>
         <main className="main-area">
@@ -104,29 +126,21 @@ export function AdminShell({ children }: { children: ReactNode }) {
             <div className="crumb">
               Workspace <span>/</span>{" "}
               <b>
-                {navigation.find((item) => path.startsWith(item.href))?.label ||
+                {(path.startsWith("/profile") ? "Profile" : navigation.find((item) => path.startsWith(item.href))?.label) ||
                   "Manage"}
               </b>
             </div>
             <div className="top-actions">
-              <button
-                className="icon-button"
-                type="button"
-                aria-label="Notifications"
-              >
-                <Bell size={17} />
-                <i />
-              </button>
-              <div className="top-avatar">AS</div>
-              <div className="admin-meta">
-                <strong>Admin Sharma</strong>
-                <small>Super admin</small>
-              </div>
+              <Link href="/profile" className="header-profile" aria-label="Open admin profile">
+                <div className="top-avatar">{initials}</div>
+                <div className="admin-meta"><strong>{profile.name}</strong></div>
+              </Link>
             </div>
           </header>
           <div className="page-content">{children}</div>
         </main>
       </div>
+      </AdminProfileContext.Provider>
     </AdminDataProvider>
   );
 }

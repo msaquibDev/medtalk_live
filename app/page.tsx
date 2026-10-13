@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
-import { ChevronRight, LockKeyhole } from "lucide-react";
+import { ChevronRight } from "lucide-react";
+import Image from "next/image";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -16,15 +17,14 @@ export default function LoginPage() {
     <main className="login-page">
       <div className="login-card">
         <div className="login-copy">
-          <h1>
-            Sign in to your
-            <br />
-            <em>admin workspace.</em>
-          </h1>
-          <p>
-            Manage conferences, faculty and your medical community from one
-            place.
-          </p>
+          <Image
+            src="/MedTalkLogin.png"
+            alt="Meditalk"
+            width={220}
+            height={80}
+            priority
+            style={{ objectFit: "contain", margin: "0 auto" }}
+          />
         </div>
         <form onSubmit={login} className="login-form">
           <label>
@@ -52,11 +52,14 @@ export default function LoginPage() {
             </span>
           </button>
         </form>
-        <div className="login-foot">
+        <div
+          className="login-foot"
+          style={{ justifyContent: "center", textAlign: "center" }}
+        >
           <span>
-            <LockKeyhole size={13} /> Secure administrator access
+            © 2026 medtalk.live by SaaScraft Studio (India) Pvt. Ltd. All rights
+            reserved.
           </span>
-          <span>Copyright 2026 Meditalk</span>
         </div>
       </div>
     </main>

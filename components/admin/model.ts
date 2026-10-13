@@ -22,6 +22,17 @@ export type Faculty = {
 
 export type Speciality = { id: number; name: string };
 
+export type RegisteredUser = {
+  id: number;
+  name: string;
+  email: string;
+  phoneCode: string;
+  mobile: string;
+  hospital: string;
+  speciality: string;
+  registeredAt: string;
+};
+
 export const initialSpecialities: Speciality[] = [
   { id: 1, name: "Uro-Oncology" },
   { id: 2, name: "Endourology" },
@@ -44,12 +55,12 @@ export const initialFaculty: Faculty[] = [
   { id: 3, name: "Dr. Rohan Iyer", email: "rohan.iyer@meditalk.in", phone: "+91 98400 87654", institute: "Manipal Hospital, Bengaluru", speciality: "Andrology" },
 ];
 
-export const initialUsers = [
-  { id: 1, name: "Dr. Piyush Gupta", email: "drpiyush2202@yahoo.co.in", mobile: "8826372491", registeredAt: "Sep 29, 2026 | 10:11 PM" },
-  { id: 2, name: "Dr. Pranjal Chowdhury", email: "pc12376@gmail.com", mobile: "8472046025", registeredAt: "Sep 29, 2026 | 10:10 PM" },
-  { id: 3, name: "Dr. Saptagiri Prasad Ramayanam", email: "saptagiriprasad@gmail.com", mobile: "9390577539", registeredAt: "Sep 29, 2026 | 09:21 PM" },
-  { id: 4, name: "Dr. K. Satyanarayana Murthy", email: "murthy3.ksn@gmail.com", mobile: "7382446399", registeredAt: "Sep 29, 2026 | 09:06 PM" },
-  { id: 5, name: "Dr. Tapan Kumar Sahoo", email: "drtapankumarsahoo@gmail.com", mobile: "8249810428", registeredAt: "Sep 29, 2026 | 09:01 PM" },
-  { id: 6, name: "Dr. Shyam Babu Prasad", email: "drsbpd.rni@gmail.com", mobile: "9431414601", registeredAt: "Sep 29, 2026 | 09:00 PM" },
-  { id: 7, name: "Dr. Nitish Aggarwal", email: "nitishaggarwal184@gmail.com", mobile: "7986298601", registeredAt: "Sep 29, 2026 | 08:54 PM" },
+export const initialUsers: RegisteredUser[] = [
+  { id: 1, name: "Dr. Piyush Gupta", email: "drpiyush2202@yahoo.co.in", phoneCode: "+91", mobile: "8826372491", hospital: "Apollo Hospitals, Delhi", speciality: "Uro-Oncology", registeredAt: "Sep 29, 2026 | 10:11 PM" },
+  { id: 2, name: "Dr. Pranjal Chowdhury", email: "pc12376@gmail.com", phoneCode: "+91", mobile: "8472046025", hospital: "AMRI Hospitals, Kolkata", speciality: "Endourology", registeredAt: "Sep 29, 2026 | 10:10 PM" },
+  { id: 3, name: "Dr. Saptagiri Prasad Ramayanam", email: "saptagiriprasad@gmail.com", phoneCode: "+91", mobile: "9390577539", hospital: "Yashoda Hospitals, Hyderabad", speciality: "Uro-Oncology", registeredAt: "Sep 29, 2026 | 09:21 PM" },
+  { id: 4, name: "Dr. K. Satyanarayana Murthy", email: "murthy3.ksn@gmail.com", phoneCode: "+91", mobile: "7382446399", hospital: "KIMS Hospitals, Hyderabad", speciality: "Andrology", registeredAt: "Sep 29, 2026 | 09:06 PM" },
+  { id: 5, name: "Dr. Tapan Kumar Sahoo", email: "drtapankumarsahoo@gmail.com", phoneCode: "+91", mobile: "8249810428", hospital: "SCB Medical College, Cuttack", speciality: "Endourology", registeredAt: "Sep 29, 2026 | 09:01 PM" },
+  { id: 6, name: "Dr. Shyam Babu Prasad", email: "drsbpd.rni@gmail.com", phoneCode: "+91", mobile: "9431414601", hospital: "RIMS, Ranchi", speciality: "General Urology", registeredAt: "Sep 29, 2026 | 09:00 PM" },
+  { id: 7, name: "Dr. Nitish Aggarwal", email: "nitishaggarwal184@gmail.com", phoneCode: "+91", mobile: "7986298601", hospital: "Max Super Speciality Hospital, Delhi", speciality: "Reconstructive Urology", registeredAt: "Sep 29, 2026 | 08:54 PM" },
 ];

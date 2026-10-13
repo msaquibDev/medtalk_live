@@ -52,6 +52,9 @@ body {
   min-height: 100%;
   margin: 0;
 }
+html {
+  scrollbar-gutter: stable;
+}
 body {
   color: var(--ink);
   font-family: Arial, Helvetica, sans-serif;
@@ -199,6 +202,39 @@ button:disabled {
 .sidebar-bottom {
   margin-top: auto;
 }
+.sidebar-profile-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-top: 1px solid var(--line);
+}
+.sidebar-profile-row .profile {
+  min-width: 0;
+  flex: 1;
+  border-top: 0;
+  cursor: pointer;
+  color: inherit;
+  text-decoration: none;
+}
+.sidebar-profile-row .profile:hover strong {
+  color: var(--green);
+}
+.profile-logout {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  flex: none;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #87958d;
+  cursor: pointer;
+}
+.profile-logout:hover {
+  background: #f1f6f3;
+  color: var(--green);
+}
 .help-card {
   padding: 15px;
   background: #f6f8f6;
@@ -295,6 +331,26 @@ button:disabled {
   display: flex;
   align-items: center;
   gap: 11px;
+}
+.header-profile {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 8px;
+  border-radius: 9px;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 140ms ease;
+}
+.header-profile:hover {
+  background: #f2f7f4;
+}
+.header-profile:focus-visible,
+.sidebar-profile-row .profile:focus-visible,
+.profile-logout:focus-visible {
+  outline: 3px solid #a6d8cb;
+  outline-offset: 2px;
 }
 .icon-button {
   width: 32px;
@@ -756,6 +812,10 @@ tbody td strong {
   background: #eaf5ef;
   color: #398063;
 }
+.inactive-pill {
+  background: #f0f2f1;
+  color: #738079;
+}
 .live-pill {
   background: #fceee9;
   color: #cc704e;
@@ -942,7 +1002,7 @@ tbody td strong {
   align-items: center;
   gap: 4px;
   color: #929d97;
-  font-size: 9px;
+  font-size: 13px;
 }
 .table-footer b {
   color: #53625a;
@@ -960,7 +1020,11 @@ tbody td strong {
   border: 1px solid #e8ece9;
   border-radius: 4px;
   color: #76837b;
-  font-size: 9px;
+  font-size: 13px;
+}
+.pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 .pagination button.current {
   background: #e9f3ee;
@@ -982,7 +1046,7 @@ tbody td strong {
   border: 0;
   background: none;
   color: #7b8981;
-  font-size: 10px;
+  font-size: 15px;
 }
 .back-link:hover {
   color: var(--green);
@@ -1002,7 +1066,7 @@ tbody td strong {
   background: none;
   padding: 0 1px 12px;
   color: #829088;
-  font-size: 10px;
+  font-size: 15px;
 }
 .manage-tabs button.selected {
   color: #196f5e;
@@ -1567,7 +1631,18 @@ tbody td strong {
   z-index: 1;
 }
 .login-card > .login-copy {
-  padding-top: 10px;
+  margin: -42px -42px 28px;
+  padding: 0;
+  display: block;
+  border-radius: 14px 14px 0 0;
+  overflow: hidden;
+}
+
+.login-copy img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
 }
 @media (max-width: 1100px) {
   .sidebar {
@@ -1723,7 +1798,7 @@ tbody td strong {
     font-size: 32px;
   }
   .table-footer {
-    font-size: 8px;
+    font-size: 11px;
     padding: 0 10px;
   }
   .pagination {
@@ -1791,6 +1866,31 @@ tbody td strong {
 }
 .export-button:hover {
   background: #f0f7f3 !important;
+}
+.edit-profile-button {
+  height: 32px;
+  padding: 0 10px;
+  border-color: var(--green);
+  color: var(--green);
+  font-size: 12px;
+}
+.faculty-metric-strip > span {
+  font-size: 14px;
+  font-weight: 600;
+}
+.field,
+.login-form label {
+  font-size: 15px;
+}
+.field > span,
+.login-form label {
+  text-transform: capitalize;
+}
+.field input,
+.field select,
+.field [data-slot="select-trigger"],
+.login-form input {
+  text-transform: none;
 }
 .confirm-overlay {
   z-index: 40;
@@ -1945,11 +2045,14 @@ tbody td strong {
   font-size: 14px;
 }
 .login-foot {
+  justify-content: center !important;
+  text-align: center;
   margin-top: 28px;
   padding-top: 18px;
   border-top: 1px solid #edf1ee;
-  gap: 10px;
   font-size: 11px;
+  color: #9aa59e;
+  line-height: 1.5;
 }
 @media (max-width: 520px) {
   .login-page {
@@ -2169,13 +2272,95 @@ tbody td strong {
   color: #829188;
 }
 .form-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
   height: 38px !important;
-  border-color: #e3e9e5 !important;
+  padding: 0 36px 0 11px;
+  border: 1px solid #dbe6df !important;
+  border-radius: 8px !important;
+  cursor: pointer;
   background: #fff !important;
-  color: #3b4942;
+  color: #263b32;
   font-size: 13px !important;
   font-weight: 400 !important;
+  text-align: left;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+.form-select-trigger:hover {
+  border-color: #9bbdaf !important;
+}
+.form-select-trigger:focus-visible {
+  outline: none;
+  border-color: var(--green) !important;
+  box-shadow: 0 0 0 3px rgb(21 121 103 / 14%);
+}
+.form-select-trigger:disabled {
+  cursor: not-allowed;
+  background-color: #f2f6f3 !important;
+  color: #87958d;
+}
+.form-select-chevron {
+  flex: none;
+  color: var(--green);
+  transition: transform 140ms ease;
+}
+.form-select-trigger[aria-expanded="true"] .form-select-chevron {
+  transform: rotate(180deg);
+}
+.select-field-placeholder {
+  color: #87958d;
+}
+.select-field-validation-proxy {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.admin-dropdown-content {
+  z-index: 60;
+  min-width: var(--radix-dropdown-menu-trigger-width);
+  max-height: min(280px, var(--radix-dropdown-menu-content-available-height));
+  overflow-y: auto;
+  padding: 5px;
+  border: 1px solid #dfe9e3;
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: 0 10px 28px rgb(25 61 45 / 14%);
+  color: #263b32;
+}
+.select-field-menu {
+  display: grid;
+  gap: 2px;
+}
+.admin-dropdown-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 37px;
+  padding: 8px 34px 8px 10px;
+  border-radius: 6px;
+  color: #34483e;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+}
+.admin-dropdown-item[data-highlighted] {
+  background: #e8f4ee;
+  color: #126c5b;
+}
+.admin-dropdown-check {
+  position: absolute;
+  right: 10px;
+  display: none;
+  color: var(--green);
+}
+.admin-dropdown-item[data-state="checked"] .admin-dropdown-check {
+  display: inline-flex;
 }
 .event-type-options {
   display: flex;
@@ -2417,7 +2602,7 @@ tbody td strong {
   font-size: 11px;
 }
 .manage-tabs button {
-  font-size: 13px;
+  font-size: 15px;
 }
 .field {
   font-size: 12px;
@@ -2503,6 +2688,48 @@ tbody td strong {
 }
 .not-found-foot {
   font-size: 10px;
+}
+.profile-settings-panel {
+  max-width: 680px;
+  padding: 26px;
+}
+.profile-settings-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+.profile-settings-avatar {
+  width: 48px;
+  height: 48px;
+  font-size: 15px;
+}
+.profile-settings-heading h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 19px;
+}
+.profile-settings-heading p {
+  margin: 5px 0 0;
+  color: #829087;
+  font-size: 13px;
+}
+.profile-settings-form {
+  display: grid;
+  gap: 18px;
+  padding-top: 22px;
+}
+.profile-settings-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 15px;
+  padding-top: 8px;
+}
+.profile-settings-actions [role="status"] {
+  color: var(--green);
+  font-size: 13px;
 }
 .not-found-brand small {
   font-size: 9px;
@@ -2710,13 +2937,14 @@ tbody td strong {
   font-size: 12px;
 }
 .table-scroll thead th {
-  font-size: 12px;
+  color: #17251f;
+  font-size: 13px;
   padding-top: 15px;
   padding-bottom: 15px;
 }
 .table-scroll tbody td,
 .table-scroll tbody td strong {
-  font-size: 14px;
+  font-size: 15px;
 }
 .table-scroll tbody td {
   padding-top: 15px;
@@ -2736,14 +2964,15 @@ tbody td strong {
 }
 .table-footer,
 .pagination button {
-  font-size: 12px;
+  font-size: 13px;
 }
 .coupon-manager .table-scroll thead th {
-  font-size: 12px;
+  color: #17251f;
+  font-size: 13px;
 }
 .coupon-manager .table-scroll tbody td,
 .coupon-manager .table-scroll tbody td strong {
-  font-size: 14px;
+  font-size: 15px;
 }
 .coupon-manager .table-scroll .status-pill {
   font-size: 12px;
@@ -2794,6 +3023,13 @@ tbody td strong {
 .banner-upload-controls input {
   max-width: 210px;
   font-size: 11px;
+}
+.field,
+.field > span,
+.coupon-form-field,
+.coupon-form-field > span,
+.login-form label {
+  font-size: 16px;
 }
 .topbar {
   position: sticky;
