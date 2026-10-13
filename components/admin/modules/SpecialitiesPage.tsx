@@ -98,7 +98,7 @@ export function SpecialitiesPage() {
               <tr>
                 <th>SPECIALITY NAME</th>
                 <th>FACULTY MEMBERS</th>
-                <th>ACTION</th>
+                <th className="action-cell">ACTION</th>
               </tr>
             </thead>
             <tbody>
