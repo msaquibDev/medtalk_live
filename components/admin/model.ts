@@ -4,6 +4,7 @@ export type Conference = {
   start: string;
   end?: string;
   venue: string;
+  accessLink?: string;
   banner?: string;
   amount: string;
   type: "Paid" | "Free";

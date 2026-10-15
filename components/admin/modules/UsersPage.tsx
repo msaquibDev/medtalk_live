@@ -22,7 +22,7 @@ export function UsersPage() {
   const filteredUsers = useMemo(
     () =>
       users.filter((user) =>
-        `${user.name} ${user.email} ${user.phoneCode} ${user.mobile} ${user.hospital} ${user.speciality}`
+        `${user.name} ${user.email} ${user.mobile} ${user.hospital} ${user.speciality}`
           .toLowerCase()
           .includes(search.toLowerCase()),
       ),
@@ -64,7 +64,6 @@ export function UsersPage() {
                 [
                   "Full name",
                   "Email",
-                  "Phone code",
                   "Mobile",
                   "Hospital / Institute",
                   "Speciality",
@@ -73,7 +72,6 @@ export function UsersPage() {
                 ...filteredUsers.map((user) => [
                   user.name,
                   user.email,
-                  user.phoneCode,
                   user.mobile,
                   user.hospital,
                   user.speciality,
@@ -149,7 +147,7 @@ export function UsersPage() {
                   </td>
                   <td>{user.email}</td>
                   <td>
-                    {user.phoneCode} {user.mobile}
+                    {user.mobile}
                   </td>
                   <td>{user.registeredAt}</td>
                   <td>

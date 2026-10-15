@@ -5,6 +5,8 @@ import { X } from "lucide-react";
 import type { RegisteredUser } from "@/components/admin/model";
 import { Field } from "@/components/admin/PageHeading";
 import { SelectField } from "@/components/admin/SelectField";
+import { DigitsOnlyInput } from "@/components/admin/DigitsOnlyInput";
+import { CountryCodeField } from "@/components/admin/CountryCodeField";
 
 export type UserProfileFormValue = Pick<
   RegisteredUser,
@@ -34,8 +36,6 @@ export function UserProfileForm({
       speciality: String(data.get("speciality")),
     });
   }
-  const codes = ["+91", "+1", "+44", "+971"];
-  if (!codes.includes(user.phoneCode)) codes.unshift(user.phoneCode);
   const specialityOptions = specialities.includes(user.speciality)
     ? specialities
     : [user.speciality, ...specialities];
@@ -74,24 +74,18 @@ export function UserProfileForm({
             required
           />
         </Field>
-        <div className="form-row">
-          <Field label="Phone code" required>
-            <SelectField
-              name="phoneCode"
-              defaultValue={user.phoneCode}
-              required
-              options={codes.map((value) => ({ value, label: value }))}
-            />
-          </Field>
-          <Field label="Mobile number" required>
-            <input
+        <Field label="Mobile number" required>
+          <div className="phone-number-fields">
+            <CountryCodeField name="phoneCode" defaultValue={user.phoneCode || "+91"} />
+            <DigitsOnlyInput
               name="mobile"
-              type="tel"
-              defaultValue={user.mobile}
+              defaultValue={user.mobile.replace(/\D/g, "")}
+              autoComplete="tel-national"
+              placeholder="9876543210"
               required
             />
-          </Field>
-        </div>
+          </div>
+        </Field>
         <Field label="Hospital / Medical College / Institute Name" required>
           <input name="hospital" defaultValue={user.hospital} required />
         </Field>

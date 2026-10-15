@@ -5,12 +5,14 @@ import { createContext, useContext } from "react";
 export type AdminProfile = {
   name: string;
   email: string;
+  phoneCode: string;
   mobile: string;
 };
 
 export const defaultAdminProfile: AdminProfile = {
   name: "Admin Sharma",
   email: "admin@meditalk.in",
+  phoneCode: "+91",
   mobile: "",
 };
 

@@ -6,7 +6,7 @@ import type { FormEvent } from "react";
 import { format } from "date-fns";
 import { X } from "lucide-react";
 import type { Conference } from "@/components/admin/model";
-import { DatePickerField } from "@/components/admin/DatePickerField";
+import { DateTimePickerField } from "@/components/admin/DateTimePickerField";
 import { Field } from "@/components/admin/PageHeading";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
@@ -64,6 +64,7 @@ export function ConferenceForm({ initial, onSave, onCancel }: Props) {
         ? `${format(new Date(`${endDate}T00:00:00`), "MMM dd, yyyy")} | ${format(new Date(`2000-01-01T${String(data.get("endTime") || "17:00")}`), "hh:mm a")}`
         : undefined,
       venue: String(data.get("venue") || "To be announced"),
+      accessLink: String(data.get("accessLink") || "").trim() || undefined,
       amount:
         eventType === "Free"
           ? "Free"
@@ -109,40 +110,32 @@ export function ConferenceForm({ initial, onSave, onCancel }: Props) {
             required
           />
         </Field>
-        <div className="form-row">
-          <Field label="Start date" required>
-            <DatePickerField
-              name="start"
-              initialValue={existingDate(initial?.start)}
-              placeholder="Select start date"
-            />
-          </Field>
-          <Field label="Start time">
-            <input type="time" name="time" defaultValue={startTime} />
-          </Field>
-        </div>
-        <div className="form-row">
-          <Field label="End date">
-            <DatePickerField
-              name="end"
-              initialValue={existingDate(initial?.end)}
-              placeholder="Select end date"
-              compact
-            />
-          </Field>
-          <Field label="End time">
-            <input
-              type="time"
-              name="endTime"
-              defaultValue={
-                existingTime(initial?.end) === "09:00" &&
-                !initial?.end?.includes(" | ")
-                  ? "17:00"
-                  : existingTime(initial?.end)
-              }
-            />
-          </Field>
-        </div>
+        <Field label="Start Date & Time" required>
+          <DateTimePickerField
+            dateName="start"
+            timeName="time"
+            datePlaceholder="Select Start Date"
+            initialDate={existingDate(initial?.start)}
+            initialTime={startTime}
+            timeLabel="Start Time"
+          />
+        </Field>
+        <Field label="End Date & Time">
+          <DateTimePickerField
+            dateName="end"
+            timeName="endTime"
+            datePlaceholder="Select End Date"
+            initialDate={existingDate(initial?.end)}
+            initialTime={
+              existingTime(initial?.end) === "09:00" &&
+              !initial?.end?.includes(" | ")
+                ? "17:00"
+                : existingTime(initial?.end)
+            }
+            timeLabel="End Time"
+            compact
+          />
+        </Field>
         <Field label="Venue">
           <input
             name="venue"
@@ -150,33 +143,52 @@ export function ConferenceForm({ initial, onSave, onCancel }: Props) {
             placeholder="Venue or online platform"
           />
         </Field>
+        <Field label="Live / Recording Link">
+          <input
+            name="accessLink"
+            type="url"
+            defaultValue={initial?.accessLink || ""}
+            placeholder="https://zoom.us/j/... or video URL"
+          />
+          <small>
+            Members use this link to join a live session or watch a recording.
+          </small>
+        </Field>
         <div className="form-row">
-          <Field label="Event type">
+          <div className="field">
+            <span>Event type</span>
             <input type="hidden" name="type" value={eventType} />
             <RadioGroup
               value={eventType}
               onValueChange={(value) => setEventType(value as "Paid" | "Free")}
               className="event-type-options"
             >
-              <div className="radio-option">
+              <label
+                className={`radio-option ${eventType === "Paid" ? "selected" : ""}`}
+                htmlFor="event-paid"
+              >
                 <RadioGroupItem value="Paid" id="event-paid" />
-                <span>Paid event</span>
-              </div>
-              <div className="radio-option">
+                <span>Paid</span>
+              </label>
+              <label
+                className={`radio-option ${eventType === "Free" ? "selected" : ""}`}
+                htmlFor="event-free"
+              >
                 <RadioGroupItem value="Free" id="event-free" />
-                <span>Free event</span>
-              </div>
+                <span>Free</span>
+              </label>
             </RadioGroup>
-          </Field>
+          </div>
           <Field label="Amount (INR)">
             <input
               name="amount"
               type="number"
               min="0"
+              disabled={eventType === "Free"}
               defaultValue={
                 initial ? Number(initial.amount.replace(/[^0-9]/g, "")) : ""
               }
-              placeholder="0"
+              placeholder={eventType === "Paid" ? "Enter amount" : "Not required for free events"}
             />
           </Field>
         </div>
@@ -193,10 +205,14 @@ export function ConferenceForm({ initial, onSave, onCancel }: Props) {
             <div className="banner-upload-controls">
               <div>
                 <b>Upload event artwork</b>
-                <small>PNG, JPG, or WebP. Maximum 5 MB.</small>
+                <small>
+                  Recommended: 1600 × 900 px (16:9). PNG, JPG, or WebP, max 5
+                  MB.
+                </small>
               </div>
               <input
                 type="file"
+                className="banner-file-input"
                 accept="image/png,image/jpeg,image/webp"
                 aria-label="Upload conference banner"
                 onChange={(event) => {

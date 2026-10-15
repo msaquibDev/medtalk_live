@@ -3,6 +3,8 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { PageHeading, Field } from "@/components/admin/PageHeading";
 import { useAdminProfile } from "@/components/admin/AdminProfileContext";
+import { DigitsOnlyInput } from "@/components/admin/DigitsOnlyInput";
+import { CountryCodeField } from "@/components/admin/CountryCodeField";
 
 export function ProfilePage() {
   const { profile, updateProfile } = useAdminProfile();
@@ -54,13 +56,19 @@ export function ProfilePage() {
             />
           </Field>
           <Field label="Mobile Number">
-            <input
-              type="tel"
-              value={form.mobile}
-              onChange={(event) => setForm((current) => ({ ...current, mobile: event.target.value }))}
-              autoComplete="tel"
-              placeholder="Enter mobile number"
-            />
+            <div className="phone-number-fields">
+              <CountryCodeField
+                name="profilePhoneCode"
+                value={form.phoneCode || "+91"}
+                onValueChange={(phoneCode) => setForm((current) => ({ ...current, phoneCode }))}
+              />
+              <DigitsOnlyInput
+                value={form.mobile.replace(/\D/g, "")}
+                onChange={(event) => setForm((current) => ({ ...current, mobile: event.target.value }))}
+                autoComplete="tel-national"
+                placeholder="Enter mobile number"
+              />
+            </div>
           </Field>
           <div className="profile-settings-actions">
             {saved && <span role="status">Profile updated.</span>}

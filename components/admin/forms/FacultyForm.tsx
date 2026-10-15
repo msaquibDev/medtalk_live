@@ -5,6 +5,9 @@ import { X } from "lucide-react";
 import type { Faculty, Speciality } from "@/components/admin/model";
 import { Field } from "@/components/admin/PageHeading";
 import { SelectField } from "@/components/admin/SelectField";
+import { DigitsOnlyInput } from "@/components/admin/DigitsOnlyInput";
+import { CountryCodeField } from "@/components/admin/CountryCodeField";
+import { splitPhoneNumber } from "@/components/admin/countryCallingCodes";
 
 export type FacultyFormValue = Omit<Faculty, "id">;
 type Props = {
@@ -25,13 +28,13 @@ export function FacultyForm({
     onSave({
       name: String(data.get("name")),
       email: String(data.get("email")),
-      phone: `${data.get("code")} ${data.get("phone")}`,
+      phone: `${String(data.get("phoneCode"))} ${String(data.get("phone"))}`,
       institute: String(data.get("institute")),
       speciality: String(data.get("speciality")),
     });
   }
-  const phoneParts = initial?.phone.split(" ") || ["+91", ""];
   const options = specialities;
+  const initialPhone = splitPhoneNumber(initial?.phone || "");
   return (
     <div
       className="overlay"
@@ -72,28 +75,18 @@ export function FacultyForm({
             required
           />
         </Field>
-        <div className="form-row">
-          <Field label="Phone code" required>
-            <SelectField
-              name="code"
-              defaultValue={phoneParts[0] || "+91"}
-              required
-              options={["+91", "+1", "+44", "+971"].map((value) => ({
-                value,
-                label: value,
-              }))}
-            />
-          </Field>
-          <Field label="Mobile number" required>
-            <input
+        <Field label="Mobile number" required>
+          <div className="phone-number-fields">
+            <CountryCodeField name="phoneCode" defaultValue={initialPhone.phoneCode} />
+            <DigitsOnlyInput
               name="phone"
-              type="tel"
-              defaultValue={phoneParts.slice(1).join(" ")}
-              placeholder="98765 43210"
+              defaultValue={initialPhone.mobile}
+              placeholder="9876543210"
+              autoComplete="tel-national"
               required
             />
-          </Field>
-        </div>
+          </div>
+        </Field>
         <Field label="Speciality" required>
           <SelectField
             name="speciality"

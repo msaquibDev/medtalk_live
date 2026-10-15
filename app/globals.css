@@ -1376,6 +1376,15 @@ tbody td strong {
 .field input::placeholder {
   color: #adb6b0;
 }
+.phone-number-fields {
+  display: grid;
+  grid-template-columns: minmax(125px, 0.85fr) minmax(0, 1.4fr);
+  gap: 8px;
+  align-items: center;
+}
+.phone-number-fields > input {
+  min-width: 0;
+}
 .field select:invalid {
   color: #aab4ad;
 }
@@ -1821,18 +1830,18 @@ tbody td strong {
   }
 }
 .date-picker-calendar {
-  --cell-size: 29px !important;
-  font-size: 11px;
+  --cell-size: 22px !important;
+  font-size: 9px;
 }
 .date-picker-popover {
   width: auto !important;
-  padding: 3px !important;
+  padding: 1px !important;
 }
 .date-picker-calendar .rdp-month {
-  gap: 8px;
+  gap: 3px;
 }
 .date-picker-calendar .rdp-weekday {
-  font-size: 10px;
+  font-size: 8px;
 }
 .table-toolbar {
   display: flex;
@@ -2271,6 +2280,41 @@ tbody td strong {
   height: 16px;
   color: #829188;
 }
+.date-time-picker {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(120px, 0.75fr);
+  gap: 8px;
+}
+.time-select-trigger {
+  width: 100%;
+  height: 38px !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  border-color: #e3e9e5 !important;
+  border-radius: 6px !important;
+  background: #fff !important;
+  color: #58665d;
+  font-size: 13px;
+  cursor: pointer;
+}
+.time-select-trigger > svg:first-child {
+  width: 16px;
+  height: 16px;
+  color: #829188;
+}
+.time-select-trigger [data-slot="select-value"] {
+  flex: 1;
+  text-align: left;
+}
+.time-select-content {
+  width: var(--radix-select-trigger-width);
+  max-height: 220px;
+}
+@media (max-width: 390px) {
+  .date-time-picker {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 .form-select-trigger {
   display: flex;
   align-items: center;
@@ -2378,9 +2422,21 @@ tbody td strong {
   padding: 10px 12px;
   color: #536159;
   font-weight: 500;
+  cursor: pointer;
+  transition: border-color 140ms ease, background-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
 }
 .radio-option span {
   font-size: 12px;
+}
+.radio-option.selected {
+  border-color: #7eb59d;
+  background: #edf7f1;
+  color: #155f4c;
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1px rgb(21 95 76 / 7%);
+}
+.radio-option:hover {
+  border-color: #9bbdaf;
 }
 .coupon-manager {
   overflow: hidden;
@@ -3022,9 +3078,27 @@ tbody td strong {
   font-size: 11px;
   color: #87958c;
 }
-.banner-upload-controls input {
-  max-width: 210px;
-  font-size: 11px;
+.banner-upload-controls .banner-file-input {
+  width: min(100%, 260px);
+  max-width: 260px;
+  color: #52645a;
+  font-size: 12px;
+}
+.banner-file-input::file-selector-button {
+  margin-right: 10px;
+  padding: 8px 12px;
+  border: 1px solid #c7ded1;
+  border-radius: 7px;
+  background: #eef7f1;
+  color: #17664f;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+.banner-file-input::file-selector-button:hover {
+  border-color: #8db99f;
+  background: #e3f1e8;
 }
 .field,
 .field > span,
