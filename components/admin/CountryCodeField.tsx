@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { CountryCode } from "libphonenumber-js";
 import { COUNTRY_OPTIONS } from "@/components/admin/countryCallingCodes";
 import { SelectField } from "@/components/admin/SelectField";
 
@@ -12,7 +13,7 @@ type CountryCodeFieldProps = {
   required?: boolean;
 };
 
-function countryForCallingCode(code: string) {
+function countryForCallingCode(code: string): CountryCode {
   return COUNTRY_OPTIONS.find((country) => country.code === code)?.value || "IN";
 }
 
@@ -23,7 +24,7 @@ export function CountryCodeField({
   onValueChange,
   required = true,
 }: CountryCodeFieldProps) {
-  const [country, setCountry] = useState(() => countryForCallingCode(value || defaultValue || "+91"));
+  const [country, setCountry] = useState<CountryCode>(() => countryForCallingCode(value || defaultValue || "+91"));
   const selectedCountry = COUNTRY_OPTIONS.find((option) => option.value === country) || COUNTRY_OPTIONS[0];
 
   useEffect(() => {
@@ -31,8 +32,9 @@ export function CountryCodeField({
   }, [value]);
 
   function changeCountry(nextCountry: string) {
-    setCountry(nextCountry);
-    const callingCode = COUNTRY_OPTIONS.find((option) => option.value === nextCountry)?.code || "+91";
+    const region = COUNTRY_OPTIONS.find((option) => option.value === nextCountry)?.value || "IN";
+    setCountry(region);
+    const callingCode = COUNTRY_OPTIONS.find((option) => option.value === region)?.code || "+91";
     onValueChange?.(callingCode);
   }
 
