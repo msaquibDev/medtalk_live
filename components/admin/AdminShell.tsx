@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { startTransition } from "react";
 import {
   CalendarDays,
   LayoutDashboard,
@@ -27,22 +28,19 @@ const navigation = [
 export function AdminShell({ children }: { children: ReactNode }) {
   const path = usePathname();
   const router = useRouter();
-  const [ready, setReady] = useState(false);
   const [profile, setProfile] = useState<AdminProfile>(defaultAdminProfile);
 
   useEffect(() => {
-    if (sessionStorage.getItem("meditalk-admin") !== "signed-in") {
-      router.replace("/");
-      return;
-    }
     try {
       const savedProfile = localStorage.getItem("meditalk-admin-profile");
-      if (savedProfile) setProfile({ ...defaultAdminProfile, ...JSON.parse(savedProfile) });
+      if (savedProfile) {
+        const parsedProfile = JSON.parse(savedProfile);
+        startTransition(() => setProfile({ ...defaultAdminProfile, ...parsedProfile }));
+      }
     } catch {
       localStorage.removeItem("meditalk-admin-profile");
     }
-    setReady(true);
-  }, [router]);
+  }, []);
 
   function updateProfile(nextProfile: AdminProfile) {
     setProfile(nextProfile);
@@ -56,15 +54,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
     .slice(0, 2)
     .toUpperCase();
 
-  function logout() {
-    sessionStorage.removeItem("meditalk-admin");
+  async function logout() {
+    await fetch("/api/auth/admin/logout", { method: "POST" }).catch(() => undefined);
     router.replace("/");
+    router.refresh();
   }
-
-  if (!ready)
-    return (
-      <div className="admin-loading" aria-label="Loading admin workspace" />
-    );
 
   return (
     <AdminDataProvider>
@@ -131,6 +125,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               </b>
             </div>
             <div className="top-actions">
+              <Link href="/change-password" className="auth-change-password">Change password</Link>
               <Link href="/profile" className="header-profile" aria-label="Open admin profile">
                 <div className="top-avatar">{initials}</div>
                 <div className="admin-meta"><strong>{profile.name}</strong></div>

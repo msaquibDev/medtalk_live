@@ -2059,7 +2059,7 @@ tbody td strong {
   margin-top: 28px;
   padding-top: 18px;
   border-top: 1px solid #edf1ee;
-  font-size: 11px;
+  font-size: 16px;
   color: #9aa59e;
   line-height: 1.5;
 }
@@ -2423,7 +2423,11 @@ tbody td strong {
   color: #536159;
   font-weight: 500;
   cursor: pointer;
-  transition: border-color 140ms ease, background-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease,
+    color 140ms ease,
+    box-shadow 140ms ease;
 }
 .radio-option span {
   font-size: 12px;
@@ -3094,7 +3098,9 @@ tbody td strong {
   font: inherit;
   font-weight: 700;
   cursor: pointer;
-  transition: border-color 140ms ease, background-color 140ms ease;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease;
 }
 .banner-file-input::file-selector-button:hover {
   border-color: #8db99f;

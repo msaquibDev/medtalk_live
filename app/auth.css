@@ -1,0 +1,53 @@
+.auth-links {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+  font-size: 13px;
+}
+
+.auth-links a,
+.auth-change-password {
+  color: #267650;
+  text-decoration: none;
+}
+
+.auth-links a:hover,
+.auth-change-password:hover {
+  text-decoration: underline;
+}
+
+.password-panel {
+  padding: 8px 0 24px;
+}
+
+.password-card {
+  width: min(100%, 520px);
+  padding: 32px;
+  border: 1px solid #e8eeea;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 12px 36px #1e3e2e0a;
+}
+
+.password-card .login-copy h1 {
+  margin: 0 0 8px;
+  font-size: 24px;
+}
+
+.password-card .login-copy p {
+  margin: 0 0 20px;
+}
+
+.password-card .login-form input {
+  height: 44px;
+}
+
+.auth-change-password {
+  font-size: 13px;
+}
+
+@media (max-width: 520px) {
+  .password-card {
+    padding: 24px 20px;
+  }
+}
