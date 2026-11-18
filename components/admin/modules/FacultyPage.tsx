@@ -1,7 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Check } from "lucide-react";
 import { useAdminData } from "@/components/admin/AdminDataProvider";
+import { useFacultyManagement } from "@/components/admin/FacultyManagementProvider";
 import {
   FacultyForm,
   type FacultyFormValue,
@@ -9,12 +11,24 @@ import {
 import { FacultyTable } from "@/components/admin/tables/FacultyTable";
 import { PageHeading, SearchField } from "@/components/admin/PageHeading";
 import type { Faculty } from "@/components/admin/model";
+import { splitPhoneNumber } from "@/components/admin/countryCallingCodes";
 
 export function FacultyPage() {
-  const { faculty, setFaculty, specialities } = useAdminData();
+  const { faculty, loading, error, refreshFaculty } = useFacultyManagement();
+  const { specialities, specialitiesLoading, specialitiesError } = useAdminData();
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Faculty | undefined>();
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [actionError, setActionError] = useState("");
+  const [notice, setNotice] = useState("");
+
+  useEffect(() => {
+    if (!notice) return;
+    const timeoutId = window.setTimeout(() => setNotice(""), 3000);
+    return () => window.clearTimeout(timeoutId);
+  }, [notice]);
   const rows = useMemo(
     () =>
       faculty.filter((member) =>
@@ -29,15 +43,63 @@ export function FacultyPage() {
     setFormOpen(false);
     setEditing(undefined);
   }
-  function saveFaculty(value: FacultyFormValue) {
-    if (editing)
-      setFaculty((current) =>
-        current.map((member) =>
-          member.id === editing.id ? { ...member, ...value } : member,
-        ),
+  async function readResult(response: Response) {
+    if (response.ok) return;
+    const messages: Record<number, string> = {
+      400: "Check the faculty details and selected speciality.",
+      401: "Your admin session has expired. Sign in again.",
+      403: "You do not have permission to manage faculty.",
+      404: "This faculty member could not be found.",
+      409: "That email address or mobile number is already in use.",
+    };
+    throw new Error(messages[response.status] || "The request could not be completed. Try again shortly.");
+  }
+
+  async function saveFaculty(value: FacultyFormValue) {
+    if (!value.specialityId) {
+      setFormError("Select a speciality.");
+      return;
+    }
+    setSaving(true);
+    setFormError("");
+    setNotice("");
+    try {
+      const response = await fetch(
+        editing ? `/api/admin/faculties/${encodeURIComponent(String(editing.id))}` : "/api/admin/faculties",
+        {
+          method: editing ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fullName: value.name.trim(),
+            email: value.email.trim(),
+            mobile: splitPhoneNumber(value.phone).mobile,
+            affiliation: value.institute.trim(),
+            specialityId: value.specialityId,
+          }),
+        },
       );
-    else setFaculty((current) => [{ ...value, id: Date.now() }, ...current]);
-    closeForm();
+      await readResult(response);
+      await refreshFaculty();
+      setNotice(editing ? "Faculty member updated." : "Faculty member created.");
+      closeForm();
+    } catch (saveError) {
+      setFormError(saveError instanceof Error ? saveError.message : "Could not save the faculty member.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function deleteFaculty(id: string | number) {
+    setActionError("");
+    setNotice("");
+    try {
+      const response = await fetch(`/api/admin/faculties/${encodeURIComponent(String(id))}`, { method: "DELETE" });
+      await readResult(response);
+      await refreshFaculty();
+      setNotice("Faculty member deleted.");
+    } catch (deleteError) {
+      setActionError(deleteError instanceof Error ? deleteError.message : "Could not delete the faculty member.");
+    }
   }
   return (
     <>
@@ -49,7 +111,8 @@ export function FacultyPage() {
           <button
             className="primary"
             type="button"
-            onClick={() => setFormOpen(true)}
+            disabled={specialitiesLoading || specialities.length === 0}
+            onClick={() => { setEditing(undefined); setFormError(""); setFormOpen(true); }}
           >
             + Add faculty
           </button>
@@ -67,25 +130,30 @@ export function FacultyPage() {
         />
       </div>
       <section className="panel table-panel">
-        <FacultyTable
-          rows={rows}
-          onEdit={(member) => {
-            setEditing(member);
-            setFormOpen(true);
-          }}
-          onDelete={(id) =>
-            setFaculty((current) =>
-              current.filter((member) => member.id !== id),
-            )
-          }
-        />
+        {specialitiesError && <p className="form-error" role="alert">Speciality choices could not be loaded: {specialitiesError}</p>}
+        {actionError && <p className="form-error" role="alert">{actionError}</p>}
+        {loading ? <div className="empty-state" role="status">Loading faculty…</div> : error ? (
+          <div className="empty-state" role="alert">
+            <p>{error}</p>
+            <button className="secondary" type="button" onClick={() => void refreshFaculty()}>Retry</button>
+          </div>
+        ) : (
+          <FacultyTable
+            rows={rows}
+            onEdit={(member) => { setEditing(member); setFormError(""); setFormOpen(true); }}
+            onDelete={(id) => void deleteFaculty(id)}
+          />
+        )}
       </section>
+      {notice && <div className="toast" role="status"><Check size={15} /><span>{notice}</span></div>}
       {formOpen && (
         <FacultyForm
           initial={editing}
           specialities={specialities}
           onSave={saveFaculty}
           onCancel={closeForm}
+          saving={saving}
+          serverError={formError}
         />
       )}
     </>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
+import { defaultAdminProfile } from "@/components/admin/AdminProfileContext";
 
 type AuthMode = "login" | "forgot" | "reset" | "change";
 
@@ -68,6 +69,20 @@ export function AdminAuthForm({ mode, token }: { mode: AuthMode; token?: string 
       }
 
       if (mode === "login") {
+        const signedInEmail = email.trim();
+        let profile = defaultAdminProfile;
+        try {
+          const savedProfile = localStorage.getItem("meditalk-admin-profile");
+          if (savedProfile) {
+            const parsedProfile = JSON.parse(savedProfile) as Partial<typeof defaultAdminProfile>;
+            if (parsedProfile.email?.toLowerCase() === signedInEmail.toLowerCase()) {
+              profile = { ...defaultAdminProfile, ...parsedProfile };
+            }
+          }
+          localStorage.setItem("meditalk-admin-profile", JSON.stringify({ ...profile, email: signedInEmail }));
+        } catch {
+          localStorage.removeItem("meditalk-admin-profile");
+        }
         router.replace("/dashboard");
         router.refresh();
         return;

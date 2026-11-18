@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAdminData } from "@/components/admin/AdminDataProvider";
+import type { Faculty } from "@/components/admin/model";
 import {
   VideoForm,
   type FacultyVideo,
@@ -33,8 +34,11 @@ const demoVideos: FacultyVideo[] = [
 export function FacultyManagePage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { faculty, specialities, users } = useAdminData();
-  const member = faculty.find((item) => item.id === Number(id));
+  const { specialities, users } = useAdminData();
+  const [member, setMember] = useState<Faculty | undefined>();
+  const [loadedId, setLoadedId] = useState("");
+  const [facultyLoading, setFacultyLoading] = useState(true);
+  const [facultyError, setFacultyError] = useState("");
   const [tab, setTab] = useState("Videos");
   const [videos, setVideos] = useState(demoVideos);
   const [formOpen, setFormOpen] = useState(false);
@@ -42,6 +46,36 @@ export function FacultyManagePage() {
   const [userSearch, setUserSearch] = useState("");
   const [userFilter, setUserFilter] = useState("All access");
   const videoRows = useMemo(() => videos, [videos]);
+
+  useEffect(() => {
+    let active = true;
+    fetch(`/api/admin/faculties/${encodeURIComponent(id)}`, { cache: "no-store" })
+      .then(async (response) => {
+        const payload = await response.json().catch(() => ({})) as {
+          success?: boolean;
+          message?: string;
+          data?: Faculty;
+        };
+        if (!response.ok || payload.success !== true || !payload.data) {
+          throw new Error(payload.message || "Could not load faculty details.");
+        }
+        return payload.data;
+      })
+      .then((facultyMember) => {
+        if (!active) return;
+        setMember(facultyMember);
+        setLoadedId(id);
+        setFacultyError("");
+      })
+      .catch((loadError: unknown) => {
+        if (!active) return;
+        setFacultyError(loadError instanceof Error ? loadError.message : "Could not load faculty details.");
+      })
+      .finally(() => {
+        if (active) setFacultyLoading(false);
+      });
+    return () => { active = false; };
+  }, [id]);
   const registrationRows = useMemo(
     () =>
       users
@@ -90,10 +124,12 @@ export function FacultyManagePage() {
     );
   }
 
-  if (!member)
+  if (facultyLoading && loadedId !== id)
+    return <div className="empty-state" role="status">Loading faculty details…</div>;
+  if (!member || loadedId !== id)
     return (
       <div className="empty-route">
-        <h1>Faculty member not found</h1>
+        <h1>{facultyError || "Faculty member not found"}</h1>
         <button className="secondary" onClick={() => router.push("/faculty")}>
           Back to faculty
         </button>

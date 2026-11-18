@@ -12,8 +12,10 @@ import { splitPhoneNumber } from "@/components/admin/countryCallingCodes";
 export type FacultyFormValue = Omit<Faculty, "id">;
 type Props = {
   initial?: Faculty;
-  onSave: (value: FacultyFormValue) => void;
+  onSave: (value: FacultyFormValue) => Promise<void> | void;
   onCancel: () => void;
+  saving?: boolean;
+  serverError?: string;
 };
 
 export function FacultyForm({
@@ -21,16 +23,20 @@ export function FacultyForm({
   specialities,
   onSave,
   onCancel,
+  saving = false,
+  serverError = "",
 }: Props & { specialities: Speciality[] }) {
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    onSave({
+    const specialityId = String(data.get("specialityId") || "");
+    await onSave({
       name: String(data.get("name")),
       email: String(data.get("email")),
       phone: `${String(data.get("phoneCode"))} ${String(data.get("phone"))}`,
       institute: String(data.get("institute")),
-      speciality: String(data.get("speciality")),
+      speciality: specialities.find((item) => item.id === specialityId)?.name || "",
+      specialityId,
     });
   }
   const options = specialities;
@@ -89,11 +95,11 @@ export function FacultyForm({
         </Field>
         <Field label="Speciality" required>
           <SelectField
-            name="speciality"
-            defaultValue={initial?.speciality || options[0]?.name}
+            name="specialityId"
+            defaultValue={initial?.specialityId || options.find((item) => item.name === initial?.speciality)?.id || options[0]?.id}
             required
             placeholder="Select speciality"
-            options={options.map(({ name }) => ({ value: name, label: name }))}
+            options={options.map(({ id, name }) => ({ value: id, label: name }))}
           />
         </Field>
         <Field label="Hospital / medical college / institute" required>
@@ -104,12 +110,14 @@ export function FacultyForm({
             required
           />
         </Field>
+        {serverError && <p className="form-error" role="alert">{serverError}</p>}
+        {options.length === 0 && <p className="form-error" role="alert">No specialities are available. Load specialities before adding faculty.</p>}
         <div className="drawer-actions">
-          <button type="button" className="secondary" onClick={onCancel}>
+          <button type="button" className="secondary" onClick={onCancel} disabled={saving}>
             Cancel
           </button>
-          <button className="primary">
-            {initial ? "Save changes" : "Add faculty member"}
+          <button className="primary" disabled={saving || options.length === 0}>
+            {saving ? "Saving…" : initial ? "Save changes" : "Add faculty member"}
           </button>
         </div>
       </form>

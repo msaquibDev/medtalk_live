@@ -13,14 +13,18 @@ export function SpecialityForm({
   existingNames,
   onSave,
   onCancel,
+  saving = false,
+  serverError = "",
 }: {
   initial?: Speciality;
   existingNames: string[];
-  onSave: (value: SpecialityFormValue) => void;
+  onSave: (value: SpecialityFormValue) => Promise<void> | void;
   onCancel: () => void;
+  saving?: boolean;
+  serverError?: string;
 }) {
   const [error, setError] = useState("");
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const name = String(data.get("name")).trim();
@@ -34,7 +38,7 @@ export function SpecialityForm({
       setError("This speciality is already in the list.");
       return;
     }
-    onSave({ name });
+    await onSave({ name });
   }
   return (
     <div
@@ -73,12 +77,17 @@ export function SpecialityForm({
             {error}
           </p>
         )}
+        {serverError && (
+          <p className="form-error" role="alert">
+            {serverError}
+          </p>
+        )}
         <div className="drawer-actions">
-          <button type="button" className="secondary" onClick={onCancel}>
+          <button type="button" className="secondary" onClick={onCancel} disabled={saving}>
             Cancel
           </button>
-          <button className="primary">
-            {initial ? "Save changes" : "Add speciality"}
+          <button className="primary" disabled={saving}>
+            {saving ? "Saving…" : initial ? "Save changes" : "Add speciality"}
           </button>
         </div>
       </form>
