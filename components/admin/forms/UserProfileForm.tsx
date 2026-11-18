@@ -18,16 +18,20 @@ export function UserProfileForm({
   specialities,
   onSave,
   onCancel,
+  saving = false,
+  serverError = "",
 }: {
   user: RegisteredUser;
   specialities: string[];
-  onSave: (value: UserProfileFormValue) => void;
+  onSave: (value: UserProfileFormValue) => Promise<void> | void;
   onCancel: () => void;
+  saving?: boolean;
+  serverError?: string;
 }) {
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    onSave({
+    await onSave({
       name: String(data.get("name")),
       email: String(data.get("email")),
       phoneCode: String(data.get("phoneCode")),
@@ -100,11 +104,12 @@ export function UserProfileForm({
             }))}
           />
         </Field>
+        {serverError && <p className="form-error" role="alert">{serverError}</p>}
         <div className="drawer-actions">
-          <button type="button" className="secondary" onClick={onCancel}>
+          <button type="button" className="secondary" onClick={onCancel} disabled={saving}>
             Cancel
           </button>
-          <button className="primary">Save profile</button>
+          <button className="primary" disabled={saving}>{saving ? "Saving…" : "Save profile"}</button>
         </div>
       </form>
     </div>

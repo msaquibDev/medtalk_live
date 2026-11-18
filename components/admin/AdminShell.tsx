@@ -33,6 +33,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const path = usePathname();
   const router = useRouter();
   const [profile, setProfile] = useState<AdminProfile>(defaultAdminProfile);
+  const [userCount, setUserCount] = useState<number | null>(null);
 
   useEffect(() => {
     try {
@@ -46,6 +47,23 @@ export function AdminShell({ children }: { children: ReactNode }) {
     } catch {
       localStorage.removeItem("meditalk-admin-profile");
     }
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/admin/users?page=1&limit=1", { cache: "no-store" })
+      .then(async (response) => {
+        const payload = await response.json().catch(() => ({})) as {
+          success?: boolean;
+          pagination?: { total?: unknown };
+        };
+        const total = payload.pagination?.total;
+        if (response.ok && payload.success === true && typeof total === "number" && active) {
+          startTransition(() => setUserCount(total));
+        }
+      })
+      .catch(() => undefined);
+    return () => { active = false; };
   }, []);
 
   function updateProfile(nextProfile: AdminProfile) {
@@ -104,7 +122,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 >
                   <Icon size={19} strokeWidth={1.7} />
                   <span>{label}</span>
-                  {label === "Users" && <b className="nav-count">1,284</b>}
+                  {label === "Users" && userCount !== null && <b className="nav-count">{userCount.toLocaleString()}</b>}
                 </Link>
               ))}
             </nav>

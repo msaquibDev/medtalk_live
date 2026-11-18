@@ -31,7 +31,7 @@ export type Speciality = {
 };
 
 export type RegisteredUser = {
-  id: number;
+  id: string | number;
   name: string;
   email: string;
   phoneCode: string;
@@ -39,6 +39,9 @@ export type RegisteredUser = {
   hospital: string;
   speciality: string;
   registeredAt: string;
+  specialityId?: string;
+  status?: "pending" | "active";
+  profileImage?: string | null;
 };
 
 export const initialSpecialities: Speciality[] = [];
